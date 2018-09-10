@@ -21,6 +21,7 @@ public class EV3 {
 	static final byte  DIRECT_COMMAND_REPLY         = (byte)  0x00;
 
 	static DeviceHandle handle;
+	Boolean verbosity;
 
 	public static void connectUsb () {
 		int result = LibUsb.init(null);
@@ -106,7 +107,7 @@ public class EV3 {
 	}
 
 	@SuppressWarnings("unused")
-	public static void main (String args[] ) {
+	public void main () {
 		try {
 			connectUsb();
 
@@ -120,5 +121,7 @@ public class EV3 {
 		} catch (Exception e) {
 	     e.printStackTrace(System.err);
 		}
+		System.out.printf("Verbosity is " + verbosity);
+		System.out.println();
 	}
 }
