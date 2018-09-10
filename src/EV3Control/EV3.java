@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.ByteOrder;
 
-public class Main {
+public class EV3 {
 	static final short ID_VENDOR_LEGO = (short) 0x0694;
 	static final short ID_PRODUCT_EV3 = (short) 0x0005;
 	static final byte  EP_IN          = (byte)  0x81;

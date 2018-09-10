@@ -24,7 +24,9 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>EV3Control.Main</mainClass>
+							<classpathPrefix>lib/</classpathPrefix>
+							<!-- <mainClass>EV3Control.EV3</mainClass> -->
+							<mainClass>EV3Control.Interface</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
