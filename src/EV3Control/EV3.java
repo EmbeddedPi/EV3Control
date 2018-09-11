@@ -19,9 +19,15 @@ public class EV3 {
 
 	static final byte  opNop                        = (byte)  0x01;
 	static final byte  DIRECT_COMMAND_REPLY         = (byte)  0x00;
+	static final byte  DIRECT_COMMAND_NO_REPLY      = (byte)  0x80;
 
 	static DeviceHandle handle;
-	Boolean verbosity;
+	Boolean verbosity = true;
+	int local = 0;
+	int global =0;
+	enum sync_mode {
+	    SYNC, ASYNC, STD 
+	}
 
 	public static void connectUsb () {
 		int result = LibUsb.init(null);
@@ -67,7 +73,7 @@ public class EV3 {
 	}
 
 	public static ByteBuffer sendDirectCmd (ByteBuffer operations,
-	int local_mem, int global_mem) {
+	int local_mem, int global_mem, Boolean verb) {
 		ByteBuffer buffer = ByteBuffer.allocateDirect(operations.position() + 7);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putShort((short) (operations.position() + 5));   // length
@@ -83,8 +89,14 @@ public class EV3 {
 		if (result != LibUsb.SUCCESS) {
 			throw new LibUsbException("Unable to write data", transferred.get(0));
 		}
-		printHex("Sent", buffer);
-
+		if (verb) {
+			printHex("Sent", buffer);
+		} else {
+			System.out.print("Suppressing sent message");
+			System.out.println();
+		}
+		
+		//TODO Split off here for wait_for_reply method
 		buffer = ByteBuffer.allocateDirect(1024);
 		transferred = IntBuffer.allocate(1);
 		result = LibUsb.bulkTransfer(handle, EP_IN, buffer, transferred, 100);
@@ -92,8 +104,12 @@ public class EV3 {
 			throw new LibUsbException("Unable to read data", result);
 		}
 		buffer.position(global_mem + 5);
-		printHex("Recv", buffer);
-
+		if (verb) {
+			printHex("Recv", buffer);
+		} else {
+			System.out.print("Suppressing recv message");
+			System.out.println();
+		}
 		return buffer;
 	}
 
@@ -114,14 +130,14 @@ public class EV3 {
 			ByteBuffer operations = ByteBuffer.allocateDirect(1);
 			operations.put(opNop);
 
-			ByteBuffer reply = sendDirectCmd(operations, 0, 0);
+			ByteBuffer reply = sendDirectCmd(operations, local, global, verbosity);
 
 			LibUsb.releaseInterface(handle, 0);
 			LibUsb.close(handle);
 		} catch (Exception e) {
 	     e.printStackTrace(System.err);
 		}
-		System.out.printf("Verbosity is " + verbosity);
-		System.out.println();
+		//System.out.printf("Verbosity is " + verbosity);
+		//System.out.println();
 	}
 }
