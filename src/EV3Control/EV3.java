@@ -17,17 +17,19 @@ public class EV3 {
 	static final byte  EP_IN          = (byte)  0x81;
 	static final byte  EP_OUT         = (byte)  0x01;
 
-	static final byte  opNop                        = (byte)  0x01;
-	static final byte  DIRECT_COMMAND_REPLY         = (byte)  0x00;
-	static final byte  DIRECT_COMMAND_NO_REPLY      = (byte)  0x80;
+	static final byte  opNop                  	= (byte)  0x01;
+	static final byte  DIRECT_COMMAND_REPLY     = (byte)  0x00;
+	static final byte  DIRECT_COMMAND_NO_REPLY  = (byte)  0x80;
+	static final byte STD 						= (byte)  0x00;;
+	static final byte SYNC 						= (byte)  0x01;;
+	static final byte ASYNC 					= (byte)  0x02;;
 
 	static DeviceHandle handle;
 	Boolean verbosity = true;
 	int local = 0;
 	int global =0;
-	enum sync_mode {
-	    SYNC, ASYNC, STD 
-	}
+	byte sync_mode = STD;
+
 
 	public static void connectUsb () {
 		int result = LibUsb.init(null);
@@ -137,7 +139,5 @@ public class EV3 {
 		} catch (Exception e) {
 	     e.printStackTrace(System.err);
 		}
-		//System.out.printf("Verbosity is " + verbosity);
-		//System.out.println();
 	}
 }
