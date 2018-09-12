@@ -28,7 +28,7 @@ public class EV3 {
 	Boolean verbosity = true;
 	int local = 0;
 	int global =0;
-	byte sync_mode = STD;
+	byte sync_mode = SYNC;
 
 
 	public static void connectUsb () {
