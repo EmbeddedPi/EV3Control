@@ -74,6 +74,7 @@ public class EV3 {
 		}
 	}
 
+	/* Original combined sendDirectCmd method
 	public static ByteBuffer sendDirectCmd (ByteBuffer operations,
 	int local_mem, int global_mem, Boolean verb) {
 		ByteBuffer buffer = ByteBuffer.allocateDirect(operations.position() + 7);
@@ -114,6 +115,50 @@ public class EV3 {
 		}
 		return buffer;
 	}
+	*/
+	
+	public static short sendDirectCmd (ByteBuffer operations,int local_mem, int global_mem, Boolean verb) {
+			short counter = 42;
+			ByteBuffer buffer = ByteBuffer.allocateDirect(operations.position() + 7);
+			buffer.order(ByteOrder.LITTLE_ENDIAN);
+			buffer.putShort((short) (operations.position() + 5));   // length
+			buffer.putShort((short) counter);                            // counter
+			buffer.put(DIRECT_COMMAND_REPLY);                       // type
+			buffer.putShort((short) (local_mem*1024 + global_mem)); // header
+			for (int i=0; i < operations.position(); i++) {         // operations
+				buffer.put(operations.get(i));	
+				IntBuffer transferred = IntBuffer.allocate(1);
+				int result = LibUsb.bulkTransfer(handle, EP_OUT, buffer, transferred, 100); 
+				if (result != LibUsb.SUCCESS) {
+					throw new LibUsbException("Unable to write data", transferred.get(0));
+				}
+				if (verb) {
+					printHex("Sent", buffer);
+				} else {
+					System.out.print("Suppressing sent message");
+					System.out.println();
+				}
+			}
+		return counter;
+	}			
+				
+	//TODO Split off here for wait_for_reply method
+	public static ByteBuffer waitForReply (ByteBuffer operations, int global_mem, short counter, Boolean verb) {
+		ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
+		IntBuffer transferred = IntBuffer.allocate(1);
+		int result = LibUsb.bulkTransfer(handle, EP_IN, buffer, transferred, 100);
+		if (result != LibUsb.SUCCESS) {
+			throw new LibUsbException("Unable to read data", result);
+		}
+		buffer.position(global_mem + 5);
+		if (verb) {
+			printHex("Recv", buffer);
+		} else {
+			System.out.print("Suppressing recv message");
+			System.out.println();
+		}
+	return buffer;
+	}
 
 	public static void printHex(String desc, ByteBuffer buffer) {
 		System.out.print(desc + " 0x|");
@@ -124,6 +169,7 @@ public class EV3 {
 		System.out.println();
 	}
 
+	//TODO Remove this after breaking returned reply down into properties
 	@SuppressWarnings("unused")
 	public void main () {
 		try {
@@ -132,8 +178,13 @@ public class EV3 {
 			ByteBuffer operations = ByteBuffer.allocateDirect(1);
 			operations.put(opNop);
 
-			ByteBuffer reply = sendDirectCmd(operations, local, global, verbosity);
-
+			//Original call for combined sendDirectCmd method
+			//ByteBuffer reply = sendDirectCmd(operations, local, global, verbosity);
+			//Sends operation and returns counter for referencing
+			short msg_count = sendDirectCmd(operations, local, global, verbosity);
+			//Gets reply based on message message count albeit not yet filtered as such
+			ByteBuffer reply = waitForReply(operations, global, msg_count, verbosity);
+			//TODO Do stuff with the reply
 			LibUsb.releaseInterface(handle, 0);
 			LibUsb.close(handle);
 		} catch (Exception e) {
