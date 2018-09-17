@@ -20,16 +20,16 @@ public class EV3 {
 	static final byte  opNop                  	= (byte)  0x01;
 	static final byte  DIRECT_COMMAND_REPLY     = (byte)  0x00;
 	static final byte  DIRECT_COMMAND_NO_REPLY  = (byte)  0x80;
-	static final byte STD 						= (byte)  0x00;;
-	static final byte SYNC 						= (byte)  0x01;;
-	static final byte ASYNC 					= (byte)  0x02;;
+	static final byte  STD 						= (byte)  0x00;;
+	static final byte  SYNC 					= (byte)  0x01;;
+	static final byte  ASYNC 					= (byte)  0x02;;
 
 	static DeviceHandle handle;
+	static private short counter = 41;
 	Boolean verbosity = true;
 	int local = 0;
 	int global =0;
 	byte sync_mode = SYNC;
-
 
 	public static void connectUsb () {
 		int result = LibUsb.init(null);
@@ -117,35 +117,39 @@ public class EV3 {
 	}
 	*/
 	
-	public static short sendDirectCmd (ByteBuffer operations,int local_mem, int global_mem, Boolean verb) {
-			short counter = 42;
-			ByteBuffer buffer = ByteBuffer.allocateDirect(operations.position() + 7);
-			buffer.order(ByteOrder.LITTLE_ENDIAN);
-			buffer.putShort((short) (operations.position() + 5));   // length
-			buffer.putShort((short) counter);                            // counter
-			buffer.put(DIRECT_COMMAND_REPLY);                       // type
-			buffer.putShort((short) (local_mem*1024 + global_mem)); // header
-			for (int i=0; i < operations.position(); i++) {         // operations
-				buffer.put(operations.get(i));	
-				IntBuffer transferred = IntBuffer.allocate(1);
-				int result = LibUsb.bulkTransfer(handle, EP_OUT, buffer, transferred, 100); 
-				if (result != LibUsb.SUCCESS) {
-					throw new LibUsbException("Unable to write data", transferred.get(0));
-				}
-				if (verb) {
-					printHex("Sent", buffer);
-				} else {
-					System.out.print("Suppressing sent message");
-					System.out.println();
-				}
+	public short sendDirectCmd (ByteBuffer operations,int local_mem, int global_mem, Boolean verb) {
+		counter++;
+		ByteBuffer buffer = ByteBuffer.allocateDirect(operations.position() + 7);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putShort((short) (operations.position() + 5));   // length
+		buffer.putShort((short) counter);                       // counter
+		if (sync_mode == SYNC || global_mem > 0) {
+			buffer.put(DIRECT_COMMAND_REPLY);  					// type
+		} else {
+			buffer.put(DIRECT_COMMAND_NO_REPLY); 				// type
+		}
+		buffer.putShort((short) (local_mem*1024 + global_mem)); // header
+		for (int i=0; i < operations.position(); i++) {         // operations
+			buffer.put(operations.get(i));	
+			IntBuffer transferred = IntBuffer.allocate(1);
+			int result = LibUsb.bulkTransfer(handle, EP_OUT, buffer, transferred, 100); 
+			if (result != LibUsb.SUCCESS) {
+				throw new LibUsbException("Unable to write data", transferred.get(0));
 			}
+			if (verb) {
+				printHex("Sent", buffer);
+			} else {
+				System.out.print("Suppressing sent message");
+				System.out.println();
+			}
+		}
 		return counter;
 	}			
-				
-	//TODO Split off here for wait_for_reply method
+	
 	public static ByteBuffer waitForReply (ByteBuffer operations, int global_mem, short counter, Boolean verb) {
 		ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
 		IntBuffer transferred = IntBuffer.allocate(1);
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		int result = LibUsb.bulkTransfer(handle, EP_IN, buffer, transferred, 100);
 		if (result != LibUsb.SUCCESS) {
 			throw new LibUsbException("Unable to read data", result);
@@ -170,7 +174,7 @@ public class EV3 {
 	}
 
 	//TODO Remove this after breaking returned reply down into properties
-	@SuppressWarnings("unused")
+	//@SuppressWarnings("unused")
 	public void main () {
 		try {
 			connectUsb();
@@ -183,7 +187,15 @@ public class EV3 {
 			//Sends operation and returns counter for referencing
 			short msg_count = sendDirectCmd(operations, local, global, verbosity);
 			//Gets reply based on message message count albeit not yet filtered as such
-			ByteBuffer reply = waitForReply(operations, global, msg_count, verbosity);
+			if (sync_mode == SYNC || (sync_mode == STD && global > 0)) {
+				ByteBuffer reply = waitForReply(operations, global, msg_count, verbosity);
+				int received = 1019 - reply.remaining();
+				System.out.printf("Received " + received + " integers in reply.");
+				System.out.println();
+			} else {
+				System.out.printf("Not waiting for reply as either ASYNC or STD with global = 0");
+				System.out.println();
+			}
 			//TODO Do stuff with the reply
 			LibUsb.releaseInterface(handle, 0);
 			LibUsb.close(handle);
