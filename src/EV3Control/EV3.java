@@ -20,9 +20,9 @@ public class EV3 {
 	static final byte  opNop                  	= (byte)  0x01;
 	static final byte  DIRECT_COMMAND_REPLY     = (byte)  0x00;
 	static final byte  DIRECT_COMMAND_NO_REPLY  = (byte)  0x80;
-	static final byte  STD 						= (byte)  0x00;;
-	static final byte  SYNC 					= (byte)  0x01;;
-	static final byte  ASYNC 					= (byte)  0x02;;
+	static final byte  STD 						= (byte)  0x00;
+	static final byte  SYNC 					= (byte)  0x01;
+	static final byte  ASYNC 					= (byte)  0x02;
 
 	static DeviceHandle handle;
 	static private short counter = 41;
@@ -117,7 +117,7 @@ public class EV3 {
 	}
 	*/
 	
-	public short sendDirectCmd (ByteBuffer operations,int local_mem, int global_mem, Boolean verb) {
+	public short sendDirectCmd (ByteBuffer operations,int local_mem, int global_mem) {
 		counter++;
 		ByteBuffer buffer = ByteBuffer.allocateDirect(operations.position() + 7);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -136,7 +136,7 @@ public class EV3 {
 			if (result != LibUsb.SUCCESS) {
 				throw new LibUsbException("Unable to write data", transferred.get(0));
 			}
-			if (verb) {
+			if (verbosity) {
 				printHex("Sent", buffer);
 			} else {
 				System.out.print("Suppressing sent message");
@@ -146,7 +146,7 @@ public class EV3 {
 		return counter;
 	}			
 	
-	public static ByteBuffer waitForReply (ByteBuffer operations, int global_mem, short counter, Boolean verb) {
+	public ByteBuffer waitForReply (int global_mem, short counter) {
 		ByteBuffer buffer = ByteBuffer.allocateDirect(1024);
 		IntBuffer transferred = IntBuffer.allocate(1);
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -155,7 +155,7 @@ public class EV3 {
 			throw new LibUsbException("Unable to read data", result);
 		}
 		buffer.position(global_mem + 5);
-		if (verb) {
+		if (verbosity) {
 			printHex("Recv", buffer);
 		} else {
 			System.out.print("Suppressing recv message");
@@ -185,10 +185,19 @@ public class EV3 {
 			//Original call for combined sendDirectCmd method
 			//ByteBuffer reply = sendDirectCmd(operations, local, global, verbosity);
 			//Sends operation and returns counter for referencing
-			short msg_count = sendDirectCmd(operations, local, global, verbosity);
+			short msg_count = sendDirectCmd(operations, local, global);
+			//System.out.printf("Sent counter is " + msg_count);
+			//System.out.println();
 			//Gets reply based on message message count albeit not yet filtered as such
 			if (sync_mode == SYNC || (sync_mode == STD && global > 0)) {
-				ByteBuffer reply = waitForReply(operations, global, msg_count, verbosity);
+				ByteBuffer reply = waitForReply(global, msg_count);
+				int returnedCounter =  reply.get(2);
+				//System.out.printf("Returned counter is " + returnedCounter + "\n");
+				while (returnedCounter != msg_count) {
+					System.out.print("Reply rejected as returned counter is  " + returnedCounter + " and msg_count is " + msg_count + "\n");
+					ByteBuffer unusedReply = waitForReply(global, msg_count);
+					returnedCounter =  unusedReply.get(2);					
+				}
 				int received = 1019 - reply.remaining();
 				System.out.printf("Received " + received + " integers in reply.");
 				System.out.println();
