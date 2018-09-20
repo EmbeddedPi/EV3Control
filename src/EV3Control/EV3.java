@@ -18,11 +18,15 @@ public class EV3 {
 	static final byte  EP_OUT         = (byte)  0x01;
 
 	static final byte  opNop                  	= (byte)  0x01;
+	static final byte  opCom_Set 				= (byte)  0xD4;
+	static final byte  SET_BRICKNAME 			= (byte)  0x08; 
 	static final byte  DIRECT_COMMAND_REPLY     = (byte)  0x00;
 	static final byte  DIRECT_COMMAND_NO_REPLY  = (byte)  0x80;
 	static final byte  STD 						= (byte)  0x00;
 	static final byte  SYNC 					= (byte)  0x01;
 	static final byte  ASYNC 					= (byte)  0x02;
+	static final byte  LCS_Leading 				= (byte)  0x84;
+	static final byte  LCS_Trailing				= (byte)  0x00;
 
 	static DeviceHandle handle;
 	static private short counter = 41;
@@ -136,12 +140,12 @@ public class EV3 {
 			if (result != LibUsb.SUCCESS) {
 				throw new LibUsbException("Unable to write data", transferred.get(0));
 			}
-			if (verbosity) {
-				printHex("Sent", buffer);
-			} else {
-				System.out.print("Suppressing sent message");
-				System.out.println();
-			}
+		}
+		if (verbosity) {
+			printHex("Sent", buffer);
+		} else {
+			System.out.print("Suppressing sent message");
+			System.out.println();
 		}
 		return counter;
 	}			
@@ -172,6 +176,18 @@ public class EV3 {
 		System.out.printf("%02X|", buffer.get(buffer.position() - 1));
 		System.out.println();
 	}
+	
+	public static byte[] LCS(String name) {
+		int length = name.length();
+		//System.out.print("Name length is " + length);
+		//System.out.println();
+		byte[] array = new byte[length+2];
+		array[0] = LCS_Leading;
+		byte[] tempName = name.getBytes();
+		System.arraycopy(tempName, 0, array, 1, length);
+		array[length+1] = LCS_Trailing;
+		return array;
+	}
 
 	//TODO Remove this after breaking returned reply down into properties
 	//@SuppressWarnings("unused")
@@ -192,17 +208,17 @@ public class EV3 {
 			if (sync_mode == SYNC || (sync_mode == STD && global > 0)) {
 				ByteBuffer reply = waitForReply(global, msg_count);
 				int returnedCounter =  reply.get(2);
-				//System.out.printf("Returned counter is " + returnedCounter + "\n");
 				while (returnedCounter != msg_count) {
 					System.out.print("Reply rejected as returned counter is  " + returnedCounter + " and msg_count is " + msg_count + "\n");
 					ByteBuffer unusedReply = waitForReply(global, msg_count);
+					System.out.print("Test message 1 \n");
 					returnedCounter =  unusedReply.get(2);					
 				}
 				int received = 1019 - reply.remaining();
-				System.out.printf("Received " + received + " integers in reply.");
+				System.out.print("Received " + received + " integers in reply.");
 				System.out.println();
 			} else {
-				System.out.printf("Not waiting for reply as either ASYNC or STD with global = 0");
+				System.out.print("Not waiting for reply as either ASYNC or STD with global = 0");
 				System.out.println();
 			}
 			//TODO Do stuff with the reply

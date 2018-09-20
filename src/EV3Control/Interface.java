@@ -33,6 +33,7 @@ public class Interface {
 		System.out.println();
 		*/
 		
+		/*
 		//Sync mode transmission tests
 		myEV3.sync_mode = EV3.SYNC;
 		System.out.printf("sync_mode set to SYNC");
@@ -83,6 +84,38 @@ public class Interface {
 		System.out.printf("sync_mode set to STD, global memory set to 6");
 		System.out.println();
 		myEV3.main();
+		*/
+		
+		//Testing code for naming brick
+		EV3.connectUsb();
+		myEV3.sync_mode = EV3.ASYNC;
+		String brickName = "myEV3";
+		int brickNameLength = brickName.length();
+		ByteBuffer ops2 = ByteBuffer.allocateDirect(brickNameLength + 4);
+		ops2.put(EV3.opCom_Set);
+		ops2.put(EV3.SET_BRICKNAME);
+		byte[] myLCSName = EV3.LCS(brickName);
+		for (int i=0; i < myLCSName.length; i++) {
+			ops2.put(myLCSName[i]);
+		}
+		System.out.println();		
+		System.out.print("Buffer length is " + ops2.position());
+		System.out.println();	
+		EV3.printHex("Test operation", ops2);
+		System.out.println();
+		
+
+		System.out.printf("Attempting to send opCom_Set \n");
+		short counter3 = myEV3.sendDirectCmd(ops2, myEV3.local, myEV3.global);
+		ByteBuffer reply3 = myEV3.waitForReply(myEV3.global, counter3);
+		int received3 = 1019 - reply3.remaining();
+		System.out.printf("received3 = " + received3);
+		System.out.println();
+		//If use EV3 then no warnings but error upon reply message
+		LibUsb.releaseInterface(myEV3.handle, 0);
+		LibUsb.close(myEV3.handle);
+		System.out.println();
+		System.out.println();
 		
 	}
 
