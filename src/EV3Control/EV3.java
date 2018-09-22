@@ -16,10 +16,20 @@ public class EV3 {
 	static final short ID_PRODUCT_EV3 = (short) 0x0005;
 	static final byte  EP_IN          = (byte)  0x81;
 	static final byte  EP_OUT         = (byte)  0x01;
-
+	
+	//Operations
 	static final byte  opNop                  	= (byte)  0x01;
+	static final byte  opSound 					= (byte)  0x94; 
 	static final byte  opCom_Set 				= (byte)  0xD4;
+ 
+	//Commands
+	static final byte  BREAK 					= (byte)  0x00;
+	static final byte  TONE 					= (byte)  0x01;
+	static final byte  PLAY 					= (byte)  0x02;
+	static final byte  REPEAT 					= (byte)  0x03;
 	static final byte  SET_BRICKNAME 			= (byte)  0x08; 
+	
+	//Communications
 	static final byte  DIRECT_COMMAND_REPLY     = (byte)  0x00;
 	static final byte  DIRECT_COMMAND_NO_REPLY  = (byte)  0x80;
 	static final byte  STD 						= (byte)  0x00;
@@ -103,7 +113,6 @@ public class EV3 {
 			System.out.println();
 		}
 		
-		//TODO Split off here for wait_for_reply method
 		buffer = ByteBuffer.allocateDirect(1024);
 		transferred = IntBuffer.allocate(1);
 		result = LibUsb.bulkTransfer(handle, EP_IN, buffer, transferred, 100);
@@ -188,6 +197,37 @@ public class EV3 {
 		array[length+1] = LCS_Trailing;
 		return array;
 	}
+	
+	public static byte[] LCX(int value) {
+		int mag = Math.abs(value);
+		byte[] array = null;
+		//Little Endian
+		if (mag > 32767) {
+			//TODO Requires implementation and test
+			//32 bit LC4, 5 byte leading 0x83 VVVV VVVV VVVV VVVV VVVV VVVV SVVV VVVV
+			array = new byte[5];
+			array[0] = (byte) 0x83;
+		} else if (mag >127) {
+			//TODO Requires implementation and test
+			//16 bit LC2, 3 byte leading 0x82 then VVVV VVVV SVVV VVVV
+			array = new byte[3];
+			array[0] = (byte) 0x82;
+			Byte tempByte = (byte) value;
+			array[1] = (byte) (tempByte & 0xFF);
+			array[2] = (byte) (tempByte & 0xFF00);			
+		} else if (mag > 31) {
+			//8 bit LC1, 2 byte leading 0x81 then SVVV VVVV
+			array = new byte[2];
+			array[0] = (byte) 0x81;
+			array[1] = (byte) value;	
+		} else {
+			//TODO Requires implementation and test
+			//5 bit LC0, 2 bit leading 0b00 then SV VVVV
+			array = new byte[1];
+			array[0] = (byte) value;
+		}
+		return array;
+	}
 
 	//TODO Remove this after breaking returned reply down into properties
 	//@SuppressWarnings("unused")
@@ -221,7 +261,6 @@ public class EV3 {
 				System.out.print("Not waiting for reply as either ASYNC or STD with global = 0");
 				System.out.println();
 			}
-			//TODO Do stuff with the reply
 			LibUsb.releaseInterface(handle, 0);
 			LibUsb.close(handle);
 		} catch (Exception e) {

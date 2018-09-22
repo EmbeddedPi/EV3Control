@@ -1,6 +1,7 @@
 package EV3Control;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
 import org.usb4java.LibUsb;
 
@@ -86,6 +87,7 @@ public class Interface {
 		myEV3.main();
 		*/
 		
+		/*
 		//Testing code for naming brick
 		EV3.connectUsb();
 		myEV3.sync_mode = EV3.ASYNC;
@@ -116,7 +118,118 @@ public class Interface {
 		LibUsb.close(myEV3.handle);
 		System.out.println();
 		System.out.println();
+		*/
 		
+		/*
+		//Testing code for playing sound
+				EV3.connectUsb();
+				myEV3.sync_mode = EV3.ASYNC;
+				String soundName = "./ui/DownloadSucces";
+				int soundNameLength = soundName.length();
+				byte[] myLCXName = EV3.LCX(50);
+				ByteBuffer ops3 = ByteBuffer.allocateDirect(soundNameLength + 4 + myLCXName.length);
+				ops3.put(EV3.opSound);
+				ops3.put(EV3.PLAY);
+
+				for (int i=0; i < myLCXName.length; i++) {
+					ops3.put(myLCXName[i]);
+					System.out.print("LCX byte [" + i + "] is  " + myLCXName[i]);
+					System.out.println();
+				}
+				byte[] myLCSName = EV3.LCS("./ui/DownloadSucces");
+				for (int i=0; i < myLCSName.length; i++) {
+					ops3.put(myLCSName[i]);
+				}
+				System.out.println();		
+				System.out.print("Buffer length is " + ops3.position());
+				System.out.println();	
+				EV3.printHex("Test operation", ops3);
+				System.out.println();
+				
+
+				System.out.printf("Attempting to send opCom_Set \n");
+				myEV3.sendDirectCmd(ops3, myEV3.local, myEV3.global);
+
+				System.out.println();
+				//If use EV3 then no warnings but error upon reply message
+				LibUsb.releaseInterface(EV3.handle, 0);
+				LibUsb.close(EV3.handle);
+				System.out.println();
+				System.out.println();
+			*/
+		/*
+		//Test code for repeating sounds
+		EV3.connectUsb();
+		myEV3.sync_mode = EV3.ASYNC;
+		String soundName = "./ui/DownloadSucces";
+		int soundNameLength = soundName.length();
+		byte[] myLCXName = EV3.LCX(50);
+		ByteBuffer ops4 = ByteBuffer.allocateDirect(soundNameLength + 4 + myLCXName.length);
+		ops4.put(EV3.opSound);
+		ops4.put(EV3.REPEAT);
+
+		for (int i=0; i < myLCXName.length; i++) {
+			ops4.put(myLCXName[i]);
+			System.out.print("LCX byte [" + i + "] is  " + myLCXName[i]);
+			System.out.println();
+		}
+		byte[] myLCSName = EV3.LCS("./ui/DownloadSucces");
+		for (int i=0; i < myLCSName.length; i++) {
+			ops4.put(myLCSName[i]);
+		}
+		System.out.println();		
+		System.out.print("Buffer length is " + ops4.position());
+		System.out.println();	
+		EV3.printHex("Test operation", ops4);
+		System.out.println();
+		
+
+		System.out.printf("Attempting to send opCom_Set \n");
+		myEV3.sendDirectCmd(ops4, myEV3.local, myEV3.global);
+
+		ByteBuffer ops5 = ByteBuffer.allocateDirect(2);
+		try {
+		TimeUnit.SECONDS.sleep(5);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ops5.put(EV3.opSound);
+		ops5.put(EV3.BREAK);
+		
+		
+		myEV3.sendDirectCmd(ops5, myEV3.local, myEV3.global);
+		
+		System.out.println();
+		//If use EV3 then no warnings but error upon reply message
+		LibUsb.releaseInterface(EV3.handle, 0);
+		LibUsb.close(EV3.handle);
+		System.out.println();
+		System.out.println();
+		*/
+		
+		//Test code for tones
+				//EV3.connectUsb();
+				myEV3.sync_mode = EV3.ASYNC;
+
+				byte[] myLCXName = EV3.LCX(50);
+
+				ByteBuffer ops7 = ByteBuffer.allocateDirect(6);
+				ops7.put(EV3.opSound);
+				ops7.put(EV3.TONE);
+				ops7.put(EV3.LCX(1));    // VOLUME
+			    //ops7.put(EV3.LCX(440));  // FREQUENCY
+			    ops7.put(EV3.LCX(127));  // FREQUENCY
+			    //ops7.put(EV3.LCX(1000)); // DURATION
+			    ops7.put(EV3.LCX(127)); // DURATION
+				myEV3.sendDirectCmd(ops7, myEV3.local, myEV3.global);
+				
+				System.out.println();
+				//If use EV3 then no warnings but error upon reply message
+				LibUsb.releaseInterface(EV3.handle, 0);
+				LibUsb.close(EV3.handle);
+				System.out.println();
+				System.out.println();
 	}
 
 }
