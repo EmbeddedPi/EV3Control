@@ -20,6 +20,7 @@ public class EV3 {
 	//Operations
 	static final byte  opNop                  	= (byte)  0x01;
 	static final byte  opSound 					= (byte)  0x94; 
+	static final byte  opSound_Ready 			= (byte)  0x96;
 	static final byte  opCom_Set 				= (byte)  0xD4;
  
 	//Commands
@@ -201,27 +202,30 @@ public class EV3 {
 	public static byte[] LCX(int value) {
 		int mag = Math.abs(value);
 		byte[] array = null;
-		//Little Endian
 		if (mag > 32767) {
-			//TODO Requires implementation and test
-			//32 bit LC4, 5 byte leading 0x83 VVVV VVVV VVVV VVVV VVVV VVVV SVVV VVVV
+			//32 bit LC4, 5 byte leading 0x83 VVVV VVVV VVVV VVVV VVVV VVVV SVVV VVVV	
+			ByteBuffer buffer = ByteBuffer.allocate(4);
+			buffer.order(ByteOrder.LITTLE_ENDIAN); 
+			buffer.putInt(value);
+			byte[] tempArray = buffer.array();
 			array = new byte[5];
 			array[0] = (byte) 0x83;
+			System.arraycopy(tempArray, 0, array, 1, 4);
 		} else if (mag >127) {
-			//TODO Requires implementation and test
 			//16 bit LC2, 3 byte leading 0x82 then VVVV VVVV SVVV VVVV
+			ByteBuffer buffer = ByteBuffer.allocate(4);
+			buffer.order(ByteOrder.LITTLE_ENDIAN); 
+			buffer.putInt(value);
+			byte[] tempArray = buffer.array();
 			array = new byte[3];
 			array[0] = (byte) 0x82;
-			Byte tempByte = (byte) value;
-			array[1] = (byte) (tempByte & 0xFF);
-			array[2] = (byte) (tempByte & 0xFF00);			
+			System.arraycopy(tempArray, 0, array, 1, 2);	
 		} else if (mag > 31) {
 			//8 bit LC1, 2 byte leading 0x81 then SVVV VVVV
 			array = new byte[2];
 			array[0] = (byte) 0x81;
 			array[1] = (byte) value;	
 		} else {
-			//TODO Requires implementation and test
 			//5 bit LC0, 2 bit leading 0b00 then SV VVVV
 			array = new byte[1];
 			array[0] = (byte) value;

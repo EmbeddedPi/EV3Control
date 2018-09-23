@@ -209,27 +209,79 @@ public class Interface {
 		*/
 		
 		//Test code for tones
-				//EV3.connectUsb();
-				myEV3.sync_mode = EV3.ASYNC;
+		/*
+		EV3.connectUsb();
+		myEV3.sync_mode = EV3.ASYNC;
 
-				byte[] myLCXName = EV3.LCX(50);
-
-				ByteBuffer ops7 = ByteBuffer.allocateDirect(6);
-				ops7.put(EV3.opSound);
-				ops7.put(EV3.TONE);
-				ops7.put(EV3.LCX(1));    // VOLUME
-			    //ops7.put(EV3.LCX(440));  // FREQUENCY
-			    ops7.put(EV3.LCX(127));  // FREQUENCY
-			    //ops7.put(EV3.LCX(1000)); // DURATION
-			    ops7.put(EV3.LCX(127)); // DURATION
-				myEV3.sendDirectCmd(ops7, myEV3.local, myEV3.global);
+		byte[] myLCXVolume = EV3.LCX(1);
+		byte[] myLCXFreq = EV3.LCX(440);
+		byte[] myLCXDuration = EV3.LCX(1000);
+		int parameterLengths = myLCXVolume.length + myLCXFreq.length + myLCXDuration.length;
+		ByteBuffer ops7 = ByteBuffer.allocateDirect(parameterLengths + 2);
+		ops7.put(EV3.opSound);
+		ops7.put(EV3.TONE);
+		ops7.put(myLCXVolume);    // VOLUME
+		ops7.put(myLCXFreq);  // FREQUENCY
+		ops7.put(myLCXDuration); // DURATION
+			    
+		System.out.println();		
+		System.out.print("Buffer length is " + ops7.position());
+		System.out.println();	
+		EV3.printHex("Test operation", ops7);
 				
-				System.out.println();
-				//If use EV3 then no warnings but error upon reply message
-				LibUsb.releaseInterface(EV3.handle, 0);
-				LibUsb.close(EV3.handle);
-				System.out.println();
-				System.out.println();
+		myEV3.sendDirectCmd(ops7, myEV3.local, myEV3.global);
+				
+		System.out.println();
+		//If use EV3 then no warnings but error upon reply message
+		LibUsb.releaseInterface(EV3.handle, 0);
+		LibUsb.close(EV3.handle);
+		System.out.println();
+		System.out.println();
+		*/
+		
+		//Test code for multiple tones
+		EV3.connectUsb();
+		myEV3.sync_mode = EV3.ASYNC;
+
+		ByteBuffer ops8 = ByteBuffer.allocateDirect(39);
+		
+		ops8.put(EV3.opSound);
+		ops8.put(EV3.TONE);
+		ops8.put(EV3.LCX(1));
+		ops8.put(EV3.LCX(262));
+		ops8.put(EV3.LCX(500));
+	    ops8.put(EV3.opSound_Ready);
+		ops8.put(EV3.opSound);
+		ops8.put(EV3.TONE);
+		ops8.put(EV3.LCX(1));
+		ops8.put(EV3.LCX(330));
+		ops8.put(EV3.LCX(500));
+	    ops8.put(EV3.opSound_Ready);
+		ops8.put(EV3.opSound);
+		ops8.put(EV3.TONE);
+		ops8.put(EV3.LCX(1));
+		ops8.put(EV3.LCX(392));
+		ops8.put(EV3.LCX(500));
+	    ops8.put(EV3.opSound_Ready);
+		ops8.put(EV3.opSound);
+		ops8.put(EV3.TONE);
+		ops8.put(EV3.LCX(2));
+		ops8.put(EV3.LCX(523));
+		ops8.put(EV3.LCX(1000));
+			    
+		System.out.println();		
+		System.out.print("Buffer length is " + ops8.position());
+		System.out.println();	
+		EV3.printHex("Test operation", ops8);
+				
+		myEV3.sendDirectCmd(ops8, myEV3.local, myEV3.global);
+				
+		System.out.println();
+		//If use EV3 then no warnings but error upon reply message
+		LibUsb.releaseInterface(EV3.handle, 0);
+		LibUsb.close(EV3.handle);
+		System.out.println();
+		System.out.println();
 	}
 
 }
