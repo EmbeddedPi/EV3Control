@@ -235,20 +235,17 @@ public class EV3 {
 
 	//TODO Remove this after breaking returned reply down into properties
 	//@SuppressWarnings("unused")
-	public void main () {
+	public void main (ByteBuffer operations) {
 		try {
 			connectUsb();
 
-			ByteBuffer operations = ByteBuffer.allocateDirect(1);
-			operations.put(opNop);
+			//ByteBuffer operations = ByteBuffer.allocateDirect(1);
+			//operations.put(opNop);
 
-			//Original call for combined sendDirectCmd method
-			//ByteBuffer reply = sendDirectCmd(operations, local, global, verbosity);
 			//Sends operation and returns counter for referencing
 			short msg_count = sendDirectCmd(operations, local, global);
-			//System.out.printf("Sent counter is " + msg_count);
-			//System.out.println();
-			//Gets reply based on message message count albeit not yet filtered as such
+
+			//Gets reply based on message message count
 			if (sync_mode == SYNC || (sync_mode == STD && global > 0)) {
 				ByteBuffer reply = waitForReply(global, msg_count);
 				int returnedCounter =  reply.get(2);
@@ -270,5 +267,32 @@ public class EV3 {
 		} catch (Exception e) {
 	     e.printStackTrace(System.err);
 		}
+	}
+	
+	public void playTone (int volume, int frequency, int duration) {
+		byte[] myLCXVolume = EV3.LCX(volume);
+		byte[] myLCXFreq = EV3.LCX(frequency);
+		byte[] myLCXDuration = EV3.LCX(duration);
+		int parameterLengths = myLCXVolume.length + myLCXFreq.length + myLCXDuration.length + 3;
+		ByteBuffer operations = ByteBuffer.allocateDirect(parameterLengths);
+		operations.put(opSound);
+		operations.put(TONE);
+		operations.put(myLCXVolume);
+		operations.put(myLCXFreq);
+		operations.put(myLCXDuration);
+		operations.put(opSound_Ready);
+		main(operations);
+	}
+	
+	public void setBrickName(String brickName) {
+		int brickNameLength = brickName.length();
+		ByteBuffer ops = ByteBuffer.allocateDirect(brickNameLength + 4);
+		ops.put(EV3.opCom_Set);
+		ops.put(EV3.SET_BRICKNAME);
+		byte[] myLCSName = EV3.LCS(brickName);
+		for (int i=0; i < myLCSName.length; i++) {
+			ops.put(myLCSName[i]);
+		}
+		main(ops);
 	}
 }
