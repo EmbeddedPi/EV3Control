@@ -20,17 +20,22 @@ public class EV3 {
 	//Operations
 	static final byte  opNop                  	= (byte)  0x01;
 	static final byte  opUI_Write 				= (byte)  0x82;
+	static final byte  opUI_Draw 				= (byte)  0x84;
 	static final byte  opSound 					= (byte)  0x94; 
 	static final byte  opSound_Ready 			= (byte)  0x96;
 	static final byte  opCom_Set 				= (byte)  0xD4;
  
 	//Commands
+	static final byte  UPDATE  					= (byte)  0x00;
 	static final byte  BREAK 					= (byte)  0x00;
 	static final byte  TONE 					= (byte)  0x01;
 	static final byte  PLAY 					= (byte)  0x02;
 	static final byte  REPEAT 					= (byte)  0x03;
-	static final byte  SET_BRICKNAME 			= (byte)  0x08; 
+	static final byte  SET_BRICKNAME 			= (byte)  0x08;
+	static final byte  TOPLINE 					= (byte)  0x12;
+	static final byte  FILLWINDOW 				= (byte)  0x13;
 	static final byte  LED 						= (byte)  0x1B;
+	static final byte  BMPFILE 					= (byte)  0x1C;
 	
 	//Patterns
 	static final byte 	LED_OFF 				= (byte)  0x00;

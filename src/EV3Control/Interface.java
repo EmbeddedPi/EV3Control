@@ -7,7 +7,7 @@ import org.usb4java.LibUsb;
 
 public class Interface {
 	public static void main(String args[]) throws InterruptedException {
-		System.out.printf("testInterface");
+		System.out.printf("Starting test interface");
 		System.out.println();		
 		
 		//Basic transmission tests
@@ -32,7 +32,10 @@ public class Interface {
 		//beepBeep2();
 		
 		//Test code for LEDs
-		testLED();
+		//testLED();
+		
+		//Test code for drawing
+		testDraw();
 	}
 	
 	private static void basicTest () {
@@ -314,5 +317,37 @@ public class Interface {
 		myEV3.setLED(EV3.LED_ORANGE_PULSE);
 		Thread.sleep(1000);
 		myEV3.setLED(EV3.LED_OFF);
+	}
+	
+	//TODO Test this method
+	private static void testDraw() throws InterruptedException {
+		System.out.print("Attempting to draw things");
+		System.out.println();
+		EV3 myEV3 = new EV3();
+		ByteBuffer ops = ByteBuffer.allocateDirect(48);
+		ops.put(EV3.opUI_Draw);
+		ops.put(EV3.TOPLINE);
+		ops.put(EV3.LCX(0));                                      // ENABLE
+		ops.put(EV3.opUI_Draw);
+		ops.put(EV3.BMPFILE);
+		ops.put(EV3.LCX(1));                                      // COLOR
+		ops.put(EV3.LCX(0));                                      // X0
+		ops.put(EV3.LCX(0));                                      // Y0
+		ops.put(EV3.LCS("../apps/Motor Control/MotorCtlAD.rgf")); // NAME
+		ops.put(EV3.opUI_Draw);
+		ops.put(EV3.UPDATE);
+		myEV3.main(ops);
+		Thread.sleep(5000);
+		ByteBuffer ops2 = ByteBuffer.allocateDirect(10);
+	    ops2.put(EV3.opUI_Draw);
+	    ops2.put(EV3.TOPLINE);
+	    ops2.put(EV3.LCX(1));     // ENABLE
+	    ops2.put(EV3.opUI_Draw);
+	    ops2.put(EV3.FILLWINDOW);
+	    ops2.put(EV3.LCX(0));     // COLOR
+	    ops2.put(EV3.LCX(0));     // Y0
+	    ops2.put(EV3.LCX(0));     // Y1
+	    ops2.put(EV3.opUI_Draw);
+	    ops2.put(EV3.UPDATE);
 	}
 }
