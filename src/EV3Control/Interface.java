@@ -27,10 +27,12 @@ public class Interface {
 		//testSoundRepeat();
 		
 		//Test code for multiple tones
-		testTones();
+		//testTones();
 		//beepBeep();
 		//beepBeep2();
-
+		
+		//Test code for LEDs
+		testLED();
 	}
 	
 	private static void basicTest () {
@@ -286,5 +288,31 @@ public class Interface {
 		myEV3.playTone(1,165,threeEighth);
 		myEV3.playTone(1,165,eighth);
 		myEV3.playTone(1,220,half);	
+	}
+	
+	private static void testLED() throws InterruptedException {
+		EV3 myEV3 = new EV3();
+		myEV3.sync_mode = EV3.ASYNC;
+		System.out.print("Attempting to set colours");
+		System.out.println();
+		myEV3.setLED(EV3.LED_RED);
+		Thread.sleep(1000);
+		myEV3.setLED(EV3.LED_GREEN);
+		Thread.sleep(1000);
+		myEV3.setLED(EV3.LED_ORANGE);
+		Thread.sleep(1000);
+		myEV3.setLED(EV3.LED_RED_FLASH);
+		Thread.sleep(1000);
+		myEV3.setLED(EV3.LED_GREEN_FLASH);
+		Thread.sleep(1000);
+		myEV3.setLED(EV3.LED_ORANGE_FLASH);
+		Thread.sleep(1000);
+		myEV3.setLED(EV3.LED_RED_PULSE);
+		Thread.sleep(1000);
+		myEV3.setLED(EV3.LED_GREEN_PULSE);
+		Thread.sleep(1000);
+		myEV3.setLED(EV3.LED_ORANGE_PULSE);
+		Thread.sleep(1000);
+		myEV3.setLED(EV3.LED_OFF);
 	}
 }

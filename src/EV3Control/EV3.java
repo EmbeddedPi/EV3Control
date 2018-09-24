@@ -19,6 +19,7 @@ public class EV3 {
 	
 	//Operations
 	static final byte  opNop                  	= (byte)  0x01;
+	static final byte  opUI_Write 				= (byte)  0x82;
 	static final byte  opSound 					= (byte)  0x94; 
 	static final byte  opSound_Ready 			= (byte)  0x96;
 	static final byte  opCom_Set 				= (byte)  0xD4;
@@ -29,6 +30,19 @@ public class EV3 {
 	static final byte  PLAY 					= (byte)  0x02;
 	static final byte  REPEAT 					= (byte)  0x03;
 	static final byte  SET_BRICKNAME 			= (byte)  0x08; 
+	static final byte  LED 						= (byte)  0x1B;
+	
+	//Patterns
+	static final byte 	LED_OFF 				= (byte)  0x00;
+	static final byte 	LED_GREEN 				= (byte)  0x01;
+	static final byte   LED_RED 				= (byte)  0x02;
+	static final byte   LED_ORANGE 				= (byte)  0x03;
+	static final byte 	LED_GREEN_FLASH 		= (byte)  0x04;
+	static final byte   LED_RED_FLASH 			= (byte)  0x05;
+	static final byte   LED_ORANGE_FLASH 		= (byte)  0x06;
+	static final byte 	LED_GREEN_PULSE 		= (byte)  0x07;
+	static final byte   LED_RED_PULSE 			= (byte)  0x08;
+	static final byte   LED_ORANGE_PULSE 		= (byte)  0x09;
 	
 	//Communications
 	static final byte  DIRECT_COMMAND_REPLY     = (byte)  0x00;
@@ -295,4 +309,13 @@ public class EV3 {
 		}
 		main(ops);
 	}
+	
+	public void setLED(Byte type) {
+		ByteBuffer ops = ByteBuffer.allocateDirect(3);
+		ops.put(opUI_Write);
+		ops.put(LED);
+		ops.put(type);
+		main(ops);
+	}
+	
 }
