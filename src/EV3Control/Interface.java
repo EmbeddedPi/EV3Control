@@ -43,7 +43,10 @@ public class Interface {
 		
 		//Test code for timer
 		//testTimer1();
-		testTimer2();
+		//testTimer2();
+		
+		//Test code to run programme
+		testRun();
 	}
 	
 	@SuppressWarnings("unused")
@@ -436,6 +439,7 @@ public class Interface {
 		System.out.print("Attempting to draw things");
 		System.out.println();
 		EV3 myEV3 = new EV3();
+		myEV3.local = 4;
 		myEV3.sync_mode = EV3.ASYNC;
 		ByteBuffer ops = ByteBuffer.allocateDirect(10);
 		ops.put(EV3.opUI_Draw);
@@ -478,12 +482,34 @@ public class Interface {
 		ops4.put(EV3.opUI_Draw);
 	    ops4.put(EV3.LINE);
 	    ops4.put(EV3.LCX(1));     	// COLOUR
-	    ops4.put(EV3.LCX(175));     	// X0
-	    ops4.put(EV3.LCX(125));     	// Y0
-	    ops4.put(EV3.LCX(2));     // X1
+	    ops4.put(EV3.LCX(175));     // X0
+	    ops4.put(EV3.LCX(125));     // Y0
+	    ops4.put(EV3.LCX(2));     	// X1
 	    ops4.put(EV3.LCX(125));     // Y1
 	    ops4.put(EV3.opUI_Draw);
 	    ops4.put(EV3.UPDATE);
 	    myEV3.main(ops4);    
 	}
+	
+	@SuppressWarnings("unused")
+	private static void testRun() {
+		System.out.print("Attempting to start program");
+		System.out.println();
+		EV3 myEV3 = new EV3();
+		myEV3.sync_mode = EV3.ASYNC;
+		myEV3.local = 8;
+		ByteBuffer ops = ByteBuffer.allocateDirect(51);
+		ops.put(EV3.opFile);
+		ops.put(EV3.LOAD_IMAGE);
+		ops.put(EV3.LCX(1));		// SLOT
+		ops.put(EV3.LCS("../apps/Motor Control/Motor Control.rbf")); //NAME
+		ops.put(EV3.LVX(0));		// SIZE
+		ops.put(EV3.LVX(4));        // IP*
+		ops.put(EV3.opProgram_Start);        // Y0
+		ops.put(EV3.LCX(1));        // SLOT
+		ops.put(EV3.LVX(0));		// SIZE
+		ops.put(EV3.LVX(4));        // IP*
+		ops.put(EV3.LCX(0));        // DEBUG	
+		myEV3.main(ops);
+	}	
 }
