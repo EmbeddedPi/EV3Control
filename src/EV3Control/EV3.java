@@ -21,6 +21,7 @@ public class EV3 {
 	static final byte  opNop                  	= (byte)  0x01;
 	static final byte  opProgram_Start 			= (byte)  0x03;
 	static final byte  opUI_Write 				= (byte)  0x82;
+	static final byte  opUI_Button 				= (byte)  0x83;
 	static final byte  opUI_Draw 				= (byte)  0x84;
 	static final byte  opTimer_Wait 			= (byte)  0x85;
 	static final byte  opTimer_Ready 			= (byte)  0x86;
@@ -36,12 +37,24 @@ public class EV3 {
 	static final byte  PLAY 					= (byte)  0x02;
 	static final byte  REPEAT					= (byte)  0x03;
 	static final byte  LINE						= (byte)  0x03;
+	static final byte  WAIT_FOR_PRESS			= (byte)  0x03;
+	static final byte  PRESS					= (byte)  0x05;
 	static final byte  LOAD_IMAGE 				= (byte)  0x08;
 	static final byte  SET_BRICKNAME 			= (byte)  0x08;
 	static final byte  TOPLINE 					= (byte)  0x12;
 	static final byte  FILLWINDOW 				= (byte)  0x13;
 	static final byte  LED 						= (byte)  0x1B;
 	static final byte  BMPFILE 					= (byte)  0x1C;
+	
+	//Buttons
+	static final byte  NO_BUTTON 				= (byte)  0x00;
+	static final byte  UP_BUTTON 				= (byte)  0x01;
+	static final byte  ENTER_BUTTON 			= (byte)  0x02;
+	static final byte  DOWN_BUTTON 				= (byte)  0x03;
+	static final byte  RIGHT_BUTTON 			= (byte)  0x04;
+	static final byte  LEFT_BUTTON 				= (byte)  0x05;
+	static final byte  BACK_BUTTON 				= (byte)  0x06;
+	static final byte  ANY_BUTTON 				= (byte)  0x07;
 	
 	//Patterns
 	static final byte 	LED_OFF 				= (byte)  0x00;
