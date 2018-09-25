@@ -21,6 +21,8 @@ public class EV3 {
 	static final byte  opNop                  	= (byte)  0x01;
 	static final byte  opUI_Write 				= (byte)  0x82;
 	static final byte  opUI_Draw 				= (byte)  0x84;
+	static final byte  opTimer_Wait 			= (byte)  0x85;
+	static final byte  opTimer_Ready 			= (byte)  0x86;
 	static final byte  opSound 					= (byte)  0x94; 
 	static final byte  opSound_Ready 			= (byte)  0x96;
 	static final byte  opCom_Set 				= (byte)  0xD4;
@@ -30,7 +32,8 @@ public class EV3 {
 	static final byte  BREAK 					= (byte)  0x00;
 	static final byte  TONE 					= (byte)  0x01;
 	static final byte  PLAY 					= (byte)  0x02;
-	static final byte  REPEAT 					= (byte)  0x03;
+	static final byte  REPEAT					= (byte)  0x03;
+	static final byte  LINE						= (byte)  0x03;
 	static final byte  SET_BRICKNAME 			= (byte)  0x08;
 	static final byte  TOPLINE 					= (byte)  0x12;
 	static final byte  FILLWINDOW 				= (byte)  0x13;
@@ -62,7 +65,7 @@ public class EV3 {
 	static private short counter = 41;
 	Boolean verbosity = true;
 	int local = 0;
-	int global =0;
+	int global = 0;
 	byte sync_mode = SYNC;
 
 	public static void connectUsb () {
@@ -108,48 +111,6 @@ public class EV3 {
 		}
 	}
 
-	/* Original combined sendDirectCmd method
-	public static ByteBuffer sendDirectCmd (ByteBuffer operations,
-	int local_mem, int global_mem, Boolean verb) {
-		ByteBuffer buffer = ByteBuffer.allocateDirect(operations.position() + 7);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
-		buffer.putShort((short) (operations.position() + 5));   // length
-		buffer.putShort((short) 42);                            // counter
-		buffer.put(DIRECT_COMMAND_REPLY);                       // type
-		buffer.putShort((short) (local_mem*1024 + global_mem)); // header
-		for (int i=0; i < operations.position(); i++) {         // operations
-			buffer.put(operations.get(i));
-		}
-
-		IntBuffer transferred = IntBuffer.allocate(1);
-		int result = LibUsb.bulkTransfer(handle, EP_OUT, buffer, transferred, 100); 
-		if (result != LibUsb.SUCCESS) {
-			throw new LibUsbException("Unable to write data", transferred.get(0));
-		}
-		if (verb) {
-			printHex("Sent", buffer);
-		} else {
-			System.out.print("Suppressing sent message");
-			System.out.println();
-		}
-		
-		buffer = ByteBuffer.allocateDirect(1024);
-		transferred = IntBuffer.allocate(1);
-		result = LibUsb.bulkTransfer(handle, EP_IN, buffer, transferred, 100);
-		if (result != LibUsb.SUCCESS) {
-			throw new LibUsbException("Unable to read data", result);
-		}
-		buffer.position(global_mem + 5);
-		if (verb) {
-			printHex("Recv", buffer);
-		} else {
-			System.out.print("Suppressing recv message");
-			System.out.println();
-		}
-		return buffer;
-	}
-	*/
-	
 	public short sendDirectCmd (ByteBuffer operations,int local_mem, int global_mem) {
 		counter++;
 		ByteBuffer buffer = ByteBuffer.allocateDirect(operations.position() + 7);
@@ -251,15 +212,44 @@ public class EV3 {
 		}
 		return array;
 	}
+	
+	public static byte[] LVX(int value) {
+		int mag = Math.abs(value);
+		byte[] array = null;
+		if (mag > 65536) {
+			//32 bit address, 5 byte leading 0xC3 VVVV VVVV VVVV VVVV VVVV VVVV VVVV VVVV	
+			ByteBuffer buffer = ByteBuffer.allocate(4);
+			buffer.order(ByteOrder.LITTLE_ENDIAN); 
+			buffer.putInt(value);
+			byte[] tempArray = buffer.array();
+			array = new byte[5];
+			array[0] = (byte) 0xC3;
+			System.arraycopy(tempArray, 0, array, 1, 4);
+		} else if (mag > 255) {
+			//16 bit address, 3 byte leading 0xC2 then VVVV VVVV VVVV VVVV
+			ByteBuffer buffer = ByteBuffer.allocate(4);
+			buffer.order(ByteOrder.LITTLE_ENDIAN); 
+			buffer.putInt(value);
+			byte[] tempArray = buffer.array();
+			array = new byte[3];
+			array[0] = (byte) 0xC2;
+			System.arraycopy(tempArray, 0, array, 1, 2);	
+		} else if (mag > 31) {
+			//8 bit address, 2 byte leading 0xC1 then VVVV VVVV
+			array = new byte[2];
+			array[0] = (byte) 0xC1;
+			array[1] = (byte) value;	
+		} else {
+			//5 bit address, 3 bit leading 0b010 then V VVVV
+			array = new byte[1];
+			array[0] = (byte) (value + 0b01000000);
+		}
+		return array;
+	}
 
-	//TODO Remove this after breaking returned reply down into properties
-	//@SuppressWarnings("unused")
 	public void main (ByteBuffer operations) {
 		try {
 			connectUsb();
-
-			//ByteBuffer operations = ByteBuffer.allocateDirect(1);
-			//operations.put(opNop);
 
 			//Sends operation and returns counter for referencing
 			short msg_count = sendDirectCmd(operations, local, global);

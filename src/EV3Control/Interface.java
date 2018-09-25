@@ -35,9 +35,18 @@ public class Interface {
 		//testLED();
 		
 		//Test code for drawing
-		testDraw();
+		//testDraw();
+		
+		//Test LVX method
+		//byte[] array = EV3.LVX(15);
+		//System.out.printf("%02X|", array[0]);
+		
+		//Test code for timer
+		//testTimer1();
+		testTimer2();
 	}
 	
+	@SuppressWarnings("unused")
 	private static void basicTest () {
 		EV3 myEV3 = new EV3();
 		ByteBuffer ops = ByteBuffer.allocateDirect(1);
@@ -62,6 +71,7 @@ public class Interface {
 		System.out.println();
 	}
 	
+	@SuppressWarnings("unused")
 	private static void testSync() {
 		EV3 myEV3 = new EV3();
 		ByteBuffer ops = ByteBuffer.allocateDirect(1);
@@ -113,6 +123,7 @@ public class Interface {
 		myEV3.main(ops);
 	}
 	
+	@SuppressWarnings("unused")
 	private static void testSound() {	
 	EV3 myEV3 = new EV3();
 	myEV3.sync_mode = EV3.ASYNC;
@@ -134,6 +145,7 @@ public class Interface {
 	myEV3.main(ops);
 	}
 	
+	@SuppressWarnings("unused")
 	private static void testSoundRepeat () {
 		EV3 myEV3 = new EV3();
 		myEV3.sync_mode = EV3.ASYNC;
@@ -159,7 +171,6 @@ public class Interface {
 		try {
 		TimeUnit.SECONDS.sleep(5);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		ops2.put(EV3.opSound);
@@ -167,6 +178,7 @@ public class Interface {
 		myEV3.main(ops2);
 	}
 	
+	@SuppressWarnings("unused")
 	private static void testTones() {
 		EV3 myEV3 = new EV3();
 		myEV3.sync_mode = EV3.ASYNC;
@@ -176,6 +188,7 @@ public class Interface {
 		myEV3.playTone(1,523,1000);
 	}
 	
+	@SuppressWarnings("unused")
 	public static void beepBeep() {
 		int tempo = 400;
 		int full = tempo;
@@ -271,6 +284,7 @@ public class Interface {
 		System.out.println();		
 	}
 	
+	@SuppressWarnings("unused")
 	public static void beepBeep2 () {
 		EV3 myEV3 = new EV3();	
 		myEV3.sync_mode = EV3.ASYNC;
@@ -293,6 +307,7 @@ public class Interface {
 		myEV3.playTone(1,220,half);	
 	}
 	
+	@SuppressWarnings("unused")
 	private static void testLED() throws InterruptedException {
 		EV3 myEV3 = new EV3();
 		myEV3.sync_mode = EV3.ASYNC;
@@ -319,20 +334,21 @@ public class Interface {
 		myEV3.setLED(EV3.LED_OFF);
 	}
 	
-	//TODO Test this method
+	@SuppressWarnings("unused")
 	private static void testDraw() throws InterruptedException {
 		System.out.print("Attempting to draw things");
 		System.out.println();
 		EV3 myEV3 = new EV3();
+		myEV3.sync_mode = EV3.ASYNC;
 		ByteBuffer ops = ByteBuffer.allocateDirect(48);
 		ops.put(EV3.opUI_Draw);
 		ops.put(EV3.TOPLINE);
-		ops.put(EV3.LCX(0));                                      // ENABLE
+		ops.put(EV3.LCX(0));		// ENABLE
 		ops.put(EV3.opUI_Draw);
 		ops.put(EV3.BMPFILE);
-		ops.put(EV3.LCX(1));                                      // COLOR
-		ops.put(EV3.LCX(0));                                      // X0
-		ops.put(EV3.LCX(0));                                      // Y0
+		ops.put(EV3.LCX(1));        // COLOUR
+		ops.put(EV3.LCX(0));        // X0
+		ops.put(EV3.LCX(0));        // Y0
 		ops.put(EV3.LCS("../apps/Motor Control/MotorCtlAD.rgf")); // NAME
 		ops.put(EV3.opUI_Draw);
 		ops.put(EV3.UPDATE);
@@ -344,10 +360,130 @@ public class Interface {
 	    ops2.put(EV3.LCX(1));     // ENABLE
 	    ops2.put(EV3.opUI_Draw);
 	    ops2.put(EV3.FILLWINDOW);
-	    ops2.put(EV3.LCX(0));     // COLOR
+	    ops2.put(EV3.LCX(0));     // COLOUR
 	    ops2.put(EV3.LCX(0));     // Y0
 	    ops2.put(EV3.LCX(0));     // Y1
 	    ops2.put(EV3.opUI_Draw);
 	    ops2.put(EV3.UPDATE);
+	    myEV3.main(ops2);
+	}
+	
+	@SuppressWarnings("unused")
+	private static void testTimer1() {
+		System.out.print("Attempting to draw things");
+		System.out.println();
+		EV3 myEV3 = new EV3();
+		myEV3.sync_mode = EV3.ASYNC;
+		myEV3.local = 4;
+		ByteBuffer ops = ByteBuffer.allocateDirect(68);
+		ops.put(EV3.opUI_Draw);
+		ops.put(EV3.TOPLINE);
+		ops.put(EV3.LCX(0));		// ENABLE
+		ops.put(EV3.opUI_Draw);
+		ops.put(EV3.FILLWINDOW);
+		ops.put(EV3.LCX(0));        // COLOUR
+		ops.put(EV3.LCX(0));        // Y0
+		ops.put(EV3.LCX(0));        // Y1
+		ops.put(EV3.opUI_Draw);
+		ops.put(EV3.UPDATE);
+		ops.put(EV3.opTimer_Wait);
+		ops.put(EV3.LCX(1000));
+		ops.put(EV3.LVX(0));
+		ops.put(EV3.opTimer_Ready);
+		ops.put(EV3.LVX(0));
+	    ops.put(EV3.opUI_Draw);
+	    ops.put(EV3.LINE);
+	    ops.put(EV3.LCX(1));     	// COLOUR
+	    ops.put(EV3.LCX(2));     	// X0
+	    ops.put(EV3.LCX(125));     	// Y0
+	    ops.put(EV3.LCX(88));     	// X1
+	    ops.put(EV3.LCX(2));     	// Y1
+	    ops.put(EV3.opUI_Draw);
+	    ops.put(EV3.UPDATE);
+	    ops.put(EV3.opTimer_Wait);
+		ops.put(EV3.LCX(500));
+		ops.put(EV3.LVX(0));
+		ops.put(EV3.opTimer_Ready);
+		ops.put(EV3.LVX(0));
+	    ops.put(EV3.opUI_Draw);
+	    ops.put(EV3.LINE);
+	    ops.put(EV3.LCX(1));     	// COLOUR
+	    ops.put(EV3.LCX(88));     	// X0
+	    ops.put(EV3.LCX(2));     	// Y0
+	    ops.put(EV3.LCX(175));     	// X1
+	    ops.put(EV3.LCX(125));     	// Y1
+	    ops.put(EV3.opUI_Draw);
+	    ops.put(EV3.UPDATE);
+	    ops.put(EV3.opTimer_Wait);
+		ops.put(EV3.LCX(500));
+		ops.put(EV3.LVX(0));
+		ops.put(EV3.opTimer_Ready);
+		ops.put(EV3.LVX(0));
+		ops.put(EV3.opUI_Draw);
+	    ops.put(EV3.LINE);
+	    ops.put(EV3.LCX(1));     	// COLOUR
+	    ops.put(EV3.LCX(175));     	// X0
+	    ops.put(EV3.LCX(125));     	// Y0
+	    ops.put(EV3.LCX(2));     	// X1
+	    ops.put(EV3.LCX(125));     	// Y1
+	    ops.put(EV3.opUI_Draw);
+	    ops.put(EV3.UPDATE);
+	    myEV3.main(ops);
+	}
+	
+	@SuppressWarnings("unused")
+	private static void testTimer2() throws InterruptedException {
+		System.out.print("Attempting to draw things");
+		System.out.println();
+		EV3 myEV3 = new EV3();
+		myEV3.sync_mode = EV3.ASYNC;
+		ByteBuffer ops = ByteBuffer.allocateDirect(10);
+		ops.put(EV3.opUI_Draw);
+		ops.put(EV3.TOPLINE);
+		ops.put(EV3.LCX(0));		// ENABLE
+		ops.put(EV3.opUI_Draw);
+		ops.put(EV3.FILLWINDOW);
+		ops.put(EV3.LCX(0));        // COLOUR
+		ops.put(EV3.LCX(0));        // Y0
+		ops.put(EV3.LCX(0));        // Y1
+		ops.put(EV3.opUI_Draw);
+		ops.put(EV3.UPDATE);
+		myEV3.main(ops);
+		Thread.sleep(1000);
+		ByteBuffer ops2 = ByteBuffer.allocateDirect(11);
+		ops2.put(EV3.opUI_Draw);
+	    ops2.put(EV3.LINE);
+	    ops2.put(EV3.LCX(1));     	// COLOUR
+	    ops2.put(EV3.LCX(2));     	// X0
+	    ops2.put(EV3.LCX(125));     // Y0
+	    ops2.put(EV3.LCX(88));     	// X1
+	    ops2.put(EV3.LCX(2));     	// Y1
+	    ops2.put(EV3.opUI_Draw);
+	    ops2.put(EV3.UPDATE);
+	    myEV3.main(ops2);
+	    Thread.sleep(500);
+	    ByteBuffer ops3 = ByteBuffer.allocateDirect(13);
+		ops3.put(EV3.opUI_Draw);
+	    ops3.put(EV3.LINE);
+	    ops3.put(EV3.LCX(1));     	// COLOUR
+	    ops3.put(EV3.LCX(88));     	// X0
+	    ops3.put(EV3.LCX(2));     	// Y0
+	    ops3.put(EV3.LCX(175));     // X1
+	    ops3.put(EV3.LCX(125));     // Y1
+	    ops3.put(EV3.opUI_Draw);
+	    ops3.put(EV3.UPDATE);
+	    myEV3.main(ops3);
+	    Thread.sleep(500);
+	    ByteBuffer ops4 = ByteBuffer.allocateDirect(13);
+		ops4.put(EV3.opUI_Draw);
+	    ops4.put(EV3.LINE);
+	    ops4.put(EV3.LCX(1));     	// COLOUR
+	    ops4.put(EV3.LCX(175));     	// X0
+	    ops4.put(EV3.LCX(125));     	// Y0
+	    ops4.put(EV3.LCX(2));     // X1
+	    ops4.put(EV3.LCX(125));     // Y1
+	    ops4.put(EV3.opUI_Draw);
+	    ops4.put(EV3.UPDATE);
+	    myEV3.main(ops4);    
 	}
 }
