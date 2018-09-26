@@ -80,6 +80,7 @@ public class EV3 {
 	static DeviceHandle handle;
 	static private short counter = 41;
 	Boolean verbosity = true;
+	Boolean buttonWait = true;
 	int local = 0;
 	int global = 0;
 	byte sync_mode = SYNC;
@@ -328,5 +329,23 @@ public class EV3 {
 		ops.put(type);
 		main(ops);
 	}
+	
+	public void pressButton(Byte button) {
+		int bufferLength;
+		if (buttonWait) {
+			bufferLength = 5;
+		} else {
+			bufferLength = 3;
+		}
+		ByteBuffer ops = ByteBuffer.allocateDirect(bufferLength);
+		ops.put(opUI_Button);
+		ops.put(PRESS);
+		ops.put(button);		
+		if (buttonWait) {
+		ops.put(opUI_Button);	
+		ops.put(WAIT_FOR_PRESS); 
+		}
+		main(ops);
+	}	
 	
 }

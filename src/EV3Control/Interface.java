@@ -194,7 +194,6 @@ public class Interface {
 		myEV3.playTone(1,523,1000);
 	}
 	
-	@SuppressWarnings("unused")
 	public static void beepBeep() {
 		int tempo = 400;
 		int full = tempo;
@@ -290,7 +289,6 @@ public class Interface {
 		System.out.println();		
 	}
 	
-	@SuppressWarnings("unused")
 	public static void beepBeep2 () {
 		EV3 myEV3 = new EV3();	
 		myEV3.sync_mode = EV3.ASYNC;
@@ -516,25 +514,13 @@ public class Interface {
 		myEV3.main(ops);
 	}	
 	
-	@SuppressWarnings("unused")
 	private static void testButton() {
-		System.out.print("Attempting to press some buttons");
-		System.out.println();
 		EV3 myEV3 = new EV3();
+		myEV3.sync_mode = EV3.SYNC;
+		myEV3.buttonWait = true;
+		myEV3.pressButton(EV3.BACK_BUTTON);
+		myEV3.pressButton(EV3.RIGHT_BUTTON);
 		myEV3.sync_mode = EV3.ASYNC;
-		myEV3.local = 8;
-		ByteBuffer ops = ByteBuffer.allocateDirect(51);
-		ops.put(EV3.opFile);
-		ops.put(EV3.LOAD_IMAGE);
-		ops.put(EV3.LCX(1));		// SLOT
-		ops.put(EV3.LCS("../apps/Motor Control/Motor Control.rbf")); //NAME
-		ops.put(EV3.LVX(0));		// SIZE
-		ops.put(EV3.LVX(4));        // IP*
-		ops.put(EV3.opProgram_Start);        // Y0
-		ops.put(EV3.LCX(1));        // SLOT
-		ops.put(EV3.LVX(0));		// SIZE
-		ops.put(EV3.LVX(4));        // IP*
-		ops.put(EV3.LCX(0));        // DEBUG	
-		myEV3.main(ops);
+		myEV3.pressButton(EV3.ENTER_BUTTON);
 	}	
 }
