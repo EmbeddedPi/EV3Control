@@ -32,7 +32,7 @@ public class Interface {
 		//beepBeep2();
 		
 		//Test code for LEDs
-		//testLED();
+		//disco();
 		
 		//Test code for drawing
 		//testDraw();
@@ -49,7 +49,10 @@ public class Interface {
 		//testRun();
 		
 		//Test code for simulating button presses
-		testButton();
+		//testButton();
+		
+		//Test code for running  motors
+		testMotor();
 	}
 	
 	@SuppressWarnings("unused")
@@ -311,8 +314,7 @@ public class Interface {
 		myEV3.playTone(1,220,half);	
 	}
 	
-	@SuppressWarnings("unused")
-	private static void testLED() throws InterruptedException {
+	public static void disco() throws InterruptedException {
 		EV3 myEV3 = new EV3();
 		myEV3.sync_mode = EV3.ASYNC;
 		System.out.print("Attempting to set colours");
@@ -514,6 +516,7 @@ public class Interface {
 		myEV3.main(ops);
 	}	
 	
+	@SuppressWarnings("unused")
 	private static void testButton() {
 		EV3 myEV3 = new EV3();
 		myEV3.sync_mode = EV3.SYNC;
@@ -522,5 +525,29 @@ public class Interface {
 		myEV3.pressButton(EV3.RIGHT_BUTTON);
 		myEV3.sync_mode = EV3.ASYNC;
 		myEV3.pressButton(EV3.ENTER_BUTTON);
+	}	
+	
+	@SuppressWarnings("unused")
+	private static void testMotor() throws InterruptedException {
+		EV3 myEV3 = new EV3();
+		myEV3.sync_mode = EV3.ASYNC;
+		ByteBuffer ops = ByteBuffer.allocateDirect(8);
+		//Start all at full blast
+		ops.put(EV3.opOutput_Power);
+		ops.put(EV3.LCX(0));		// LAYER
+		ops.put(EV3.LCX(15)); 		// NOS ALL MOTORS
+		ops.put(EV3.LCX(100));		// POWER
+		ops.put(EV3.opOutput_Start);        
+		ops.put(EV3.LCX(0));        // LAYER
+		ops.put(EV3.LCX(15)); 		// NOS ALL MOTORS
+		myEV3.main(ops);
+		Thread.sleep(2000);
+		ByteBuffer ops2 = ByteBuffer.allocateDirect(4);
+		//Stop all
+		ops2.put(EV3.opOutput_Stop);
+		ops2.put(EV3.LCX(0));		// LAYER
+		ops2.put(EV3.LCX(15)); 		// NOS ALL MOTORS
+		ops2.put(EV3.LCX(0));		// FLOAT BRAKE
+		myEV3.main(ops2);
 	}	
 }
